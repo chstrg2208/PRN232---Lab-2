@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: prn232_lms_db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Your_password123
+      - MSSQL_PID=Developer
+    ports:
+      - "14333:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - lms_network
+    restart: always
+
+  api:
+    image: prn232_lms_api
+    container_name: prn232_lms_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PRN232_LMS_DB;User Id=sa;Password=Your_password123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - JWT_SECRET=PRN232_Advanced_REST_API_And_Security_JWT_Secret_Key_2026_Prod
+      - Jwt__Issuer=PRN232.LMS.API
+      - Jwt__Audience=PRN232.LMS.Client
+      - Jwt__ExpiryMinutes=60
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - lms_network
+    restart: always
+
+volumes:
+  sqlserver_data:
+
+networks:
+  lms_network:
+    driver: bridge
