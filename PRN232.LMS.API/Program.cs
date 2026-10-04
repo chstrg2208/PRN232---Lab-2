@@ -226,4 +226,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Allow accessing Swagger via both / and /swagger
+app.MapGet("/swagger", () => Results.Redirect("/index.html"));
+app.MapGet("/swagger/index.html", () => Results.Redirect("/index.html"));
+
 app.Run();
