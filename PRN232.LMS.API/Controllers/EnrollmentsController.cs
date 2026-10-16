@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
@@ -22,15 +23,26 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetEnrollments(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
         {
+            if (!string.IsNullOrWhiteSpace(requestId))
+            {
+                Response.Headers["X-Request-Id"] = requestId;
+            }
             var result = await _enrollmentService.GetEnrollmentsAsync(queryParams);
+            if (string.IsNullOrWhiteSpace(queryParams.Fields))
+            {
+                var typedItems = result.Items.Cast<EnrollmentResponse>().ToList();
+                return Ok(ApiResponse<List<EnrollmentResponse>>.Ok(typedItems, "Enrollments retrieved successfully", result.Pagination));
+            }
             return Ok(ApiResponse<IEnumerable<object>>.Ok(result.Items, "Enrollments retrieved successfully", result.Pagination));
         }
 
         [HttpGet("{id:int}", Name = "GetEnrollmentById")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetEnrollmentById(
             [FromRoute] int id,
             [FromQuery] string? fields,
@@ -40,6 +52,10 @@ namespace PRN232.LMS.API.Controllers
             if (result == null)
             {
                 return NotFound(ApiResponse<object>.Fail($"Enrollment with ID {id} was not found"));
+            }
+            if (string.IsNullOrWhiteSpace(fields) && result is EnrollmentResponse typedEnrollment)
+            {
+                return Ok(ApiResponse<EnrollmentResponse>.Ok(typedEnrollment, "Enrollment retrieved successfully"));
             }
             return Ok(ApiResponse<object>.Ok(result, "Enrollment retrieved successfully"));
         }

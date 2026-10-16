@@ -188,21 +188,22 @@ namespace PRN232.LMS.Repositories.Data
             modelBuilder.Entity<Enrollment>().HasData(enrollments);
 
             // 6. Users (Admin and Student)
-            var defaultPasswordHash = BCrypt.Net.BCrypt.HashPassword("123456", 10);
+            var adminPasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 10);
+            var studentPasswordHash = BCrypt.Net.BCrypt.HashPassword("Student@123", 10);
             var users = new List<User>
             {
                 new()
                 {
                     UserId = 1,
                     Username = "admin",
-                    PasswordHash = defaultPasswordHash,
+                    PasswordHash = adminPasswordHash,
                     Role = "Admin"
                 },
                 new()
                 {
                     UserId = 2,
                     Username = "student",
-                    PasswordHash = defaultPasswordHash,
+                    PasswordHash = studentPasswordHash,
                     Role = "Student"
                 }
             };

@@ -20,7 +20,13 @@ namespace PRN232.LMS.API.Middlewares
         {
             var stopwatch = Stopwatch.StartNew();
             var path = context.Request.Path;
+            var fullPath = path + context.Request.QueryString;
             var method = context.Request.Method;
+
+            if (context.Request.Headers.TryGetValue("X-Request-Id", out var requestId) && !string.IsNullOrWhiteSpace(requestId))
+            {
+                context.Response.Headers["X-Request-Id"] = requestId.ToString();
+            }
 
             try
             {
@@ -35,7 +41,7 @@ namespace PRN232.LMS.API.Middlewares
                 _logger.LogInformation(
                     "[HTTP {Method}] {Path} returned {StatusCode} in {Elapsed} ms",
                     method,
-                    path,
+                    fullPath,
                     statusCode,
                     elapsedMs);
             }

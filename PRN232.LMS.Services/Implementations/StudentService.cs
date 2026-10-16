@@ -48,7 +48,7 @@ namespace PRN232.LMS.Services.Implementations
             // 4. Paging
             var totalItems = await query.CountAsync();
             var page = queryParams.Page <= 0 ? 1 : queryParams.Page;
-            var pageSize = queryParams.Size <= 0 ? 10 : queryParams.Size;
+            var pageSize = queryParams.Size <= 0 ? 10 : Math.Min(queryParams.Size, 100);
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var students = await query

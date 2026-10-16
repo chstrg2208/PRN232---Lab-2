@@ -1,0 +1,21 @@
+{
+  "studentCode": "SE180000",
+  "fullName": "PRN232 Student",
+  "projectName": "LMS",
+  "apiVersionBase": "/api/v1",
+  "healthPath": "/health",
+  "auth": {
+    "loginPath": "/api/v1/auth/login",
+    "refreshPath": "/api/v1/auth/refresh-token",
+    "adminUsername": "admin",
+    "adminPassword": "Admin@123",
+    "userUsername": "student",
+    "userPassword": "Student@123"
+  },
+  "endpoints": {
+    "protected": "/api/v1/students",
+    "adminOnly": "/api/v1/subjects",
+    "createTarget": "/api/v1/students",
+    "nested": "/api/v1/courses/1/students"
+  }
+}

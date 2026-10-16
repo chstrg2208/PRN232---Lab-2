@@ -34,6 +34,9 @@ namespace PRN232.LMS.Services.Models.Requests
         [FptuRollNumber]
         [RegularExpression(@"^(SE|CE|IA|HE|HS|SS|MC|GD)\d{5,}$", ErrorMessage = "Roll number must match FPTU pattern (e.g. SE19886, CE18793)")]
         public string? RollNumber { get; set; }
+
+        [Range(0, 200, ErrorMessage = "Credit must be between 0 and 200")]
+        public int? Credit { get; set; }
     }
 
     public class UpdateStudentRequest
@@ -56,6 +59,9 @@ namespace PRN232.LMS.Services.Models.Requests
         [FptuRollNumber]
         [RegularExpression(@"^(SE|CE|IA|HE|HS|SS|MC|GD)\d{5,}$", ErrorMessage = "Roll number must match FPTU pattern (e.g. SE19886, CE18793)")]
         public string? RollNumber { get; set; }
+
+        [Range(0, 200, ErrorMessage = "Credit must be between 0 and 200")]
+        public int? Credit { get; set; }
     }
 
     public class CreateEnrollmentRequest

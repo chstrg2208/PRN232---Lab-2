@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
@@ -22,15 +23,26 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCourses(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
         {
+            if (!string.IsNullOrWhiteSpace(requestId))
+            {
+                Response.Headers["X-Request-Id"] = requestId;
+            }
             var result = await _courseService.GetCoursesAsync(queryParams);
+            if (string.IsNullOrWhiteSpace(queryParams.Fields))
+            {
+                var typedItems = result.Items.Cast<CourseResponse>().ToList();
+                return Ok(ApiResponse<List<CourseResponse>>.Ok(typedItems, "Courses retrieved successfully", result.Pagination));
+            }
             return Ok(ApiResponse<IEnumerable<object>>.Ok(result.Items, "Courses retrieved successfully", result.Pagination));
         }
 
         [HttpGet("{id:int}", Name = "GetCourseById")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCourseById(
             [FromRoute] int id,
             [FromQuery] string? fields,
@@ -41,11 +53,16 @@ namespace PRN232.LMS.API.Controllers
             {
                 return NotFound(ApiResponse<object>.Fail($"Course with ID {id} was not found"));
             }
+            if (string.IsNullOrWhiteSpace(fields) && result is CourseResponse typedCourse)
+            {
+                return Ok(ApiResponse<CourseResponse>.Ok(typedCourse, "Course retrieved successfully"));
+            }
             return Ok(ApiResponse<object>.Ok(result, "Course retrieved successfully"));
         }
 
         // Nested resource: /api/v1/courses/{courseId}/students
         [HttpGet("{courseId:int}/students")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetStudentsByCourse([FromRoute] int courseId)
         {
             var students = await _courseService.GetStudentsByCourseIdAsync(courseId);
@@ -53,7 +70,7 @@ namespace PRN232.LMS.API.Controllers
             {
                 return NotFound(ApiResponse<object>.Fail($"Course with ID {courseId} was not found"));
             }
-            return Ok(ApiResponse<IEnumerable<StudentSummaryResponse>>.Ok(students, "Course students retrieved successfully"));
+            return Ok(ApiResponse<List<StudentSummaryResponse>>.Ok(students.ToList(), "Course students retrieved successfully"));
         }
 
         [HttpPost]
@@ -110,13 +127,20 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSemesters([FromQuery] QueryParameters queryParams)
         {
             var result = await _semesterService.GetSemestersAsync(queryParams);
+            if (string.IsNullOrWhiteSpace(queryParams.Fields))
+            {
+                var typedItems = result.Items.Cast<SemesterResponse>().ToList();
+                return Ok(ApiResponse<List<SemesterResponse>>.Ok(typedItems, "Semesters retrieved successfully", result.Pagination));
+            }
             return Ok(ApiResponse<IEnumerable<object>>.Ok(result.Items, "Semesters retrieved successfully", result.Pagination));
         }
 
         [HttpGet("{id:int}", Name = "GetSemesterById")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSemesterById(
             [FromRoute] int id,
             [FromQuery] string? fields,
@@ -126,6 +150,10 @@ namespace PRN232.LMS.API.Controllers
             if (result == null)
             {
                 return NotFound(ApiResponse<object>.Fail($"Semester with ID {id} was not found"));
+            }
+            if (string.IsNullOrWhiteSpace(fields) && result is SemesterResponse typedSemester)
+            {
+                return Ok(ApiResponse<SemesterResponse>.Ok(typedSemester, "Semester retrieved successfully"));
             }
             return Ok(ApiResponse<object>.Ok(result, "Semester retrieved successfully"));
         }
@@ -184,19 +212,30 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetSubjects([FromQuery] QueryParameters queryParams)
         {
             var result = await _subjectService.GetSubjectsAsync(queryParams);
+            if (string.IsNullOrWhiteSpace(queryParams.Fields))
+            {
+                var typedItems = result.Items.Cast<SubjectResponse>().ToList();
+                return Ok(ApiResponse<List<SubjectResponse>>.Ok(typedItems, "Subjects retrieved successfully", result.Pagination));
+            }
             return Ok(ApiResponse<IEnumerable<object>>.Ok(result.Items, "Subjects retrieved successfully", result.Pagination));
         }
 
         [HttpGet("{id:int}", Name = "GetSubjectById")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetSubjectById([FromRoute] int id, [FromQuery] string? fields)
         {
             var result = await _subjectService.GetSubjectByIdAsync(id, fields);
             if (result == null)
             {
                 return NotFound(ApiResponse<object>.Fail($"Subject with ID {id} was not found"));
+            }
+            if (string.IsNullOrWhiteSpace(fields) && result is SubjectResponse typedSubject)
+            {
+                return Ok(ApiResponse<SubjectResponse>.Ok(typedSubject, "Subject retrieved successfully"));
             }
             return Ok(ApiResponse<object>.Ok(result, "Subject retrieved successfully"));
         }

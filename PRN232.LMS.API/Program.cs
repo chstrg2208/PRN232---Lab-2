@@ -31,11 +31,30 @@ builder.Services.AddControllers(options =>
     options.RespectBrowserAcceptHeader = true;
     options.ReturnHttpNotAcceptable = true;
 })
+.AddXmlSerializerFormatters()
 .AddXmlDataContractSerializerFormatters()
 .AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+})
+.ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = new System.Collections.Generic.List<string>();
+        foreach (var state in context.ModelState)
+        {
+            foreach (var err in state.Value.Errors)
+            {
+                var msg = string.IsNullOrWhiteSpace(err.ErrorMessage)
+                    ? $"Invalid value for '{state.Key}'"
+                    : err.ErrorMessage;
+                errors.Add(msg);
+            }
+        }
+        var response = PRN232.LMS.Services.Models.Responses.ApiResponse<object>.Fail("Invalid input data", errors);
+        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(response);
+    };
 });
 
 // 2. FluentValidation
@@ -172,23 +191,40 @@ using (var scope = app.Services.CreateScope())
             if (!dbContext.Users.Any())
             {
                 logger.LogInformation("Seeding default Lab 2 users (admin, student)...");
-                var hash = BCrypt.Net.BCrypt.HashPassword("123456", 10);
                 dbContext.Users.AddRange(
                     new PRN232.LMS.Repositories.Entities.User
                     {
                         Username = "admin",
-                        PasswordHash = hash,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 10),
                         Role = "Admin"
                     },
                     new PRN232.LMS.Repositories.Entities.User
                     {
                         Username = "student",
-                        PasswordHash = hash,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Student@123", 10),
                         Role = "Student"
                     }
                 );
                 dbContext.SaveChanges();
                 logger.LogInformation("Default users seeded successfully.");
+            }
+            else
+            {
+                var adminUser = dbContext.Users.FirstOrDefault(u => u.Username == "admin");
+                if (adminUser != null && !BCrypt.Net.BCrypt.Verify("Admin@123", adminUser.PasswordHash))
+                {
+                    adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 10);
+                    adminUser.Role = "Admin";
+                    dbContext.SaveChanges();
+                }
+
+                var studentUser = dbContext.Users.FirstOrDefault(u => u.Username == "student");
+                if (studentUser != null && !BCrypt.Net.BCrypt.Verify("Student@123", studentUser.PasswordHash))
+                {
+                    studentUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Student@123", 10);
+                    studentUser.Role = "Student";
+                    dbContext.SaveChanges();
+                }
             }
 
             logger.LogInformation("Database ready and seeded successfully.");
@@ -225,6 +261,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
 
 // Allow accessing Swagger via both / and /swagger
 app.MapGet("/swagger", () => Results.Redirect("/index.html"));

@@ -78,9 +78,15 @@ namespace PRN232.LMS.Services.Implementations
 
         public async Task<AuthResponse?> RefreshTokenAsync(RefreshTokenRequest request)
         {
+            var tokenToFind = !string.IsNullOrWhiteSpace(request.RefreshToken) ? request.RefreshToken : request.Token;
+            if (string.IsNullOrWhiteSpace(tokenToFind))
+            {
+                return null;
+            }
+
             var storedToken = await _refreshTokenRepo.GetQueryable()
                 .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Token == request.RefreshToken);
+                .FirstOrDefaultAsync(r => r.Token == tokenToFind);
 
             if (storedToken == null || storedToken.IsRevoked || storedToken.Expires <= DateTime.UtcNow)
             {
@@ -140,6 +146,7 @@ namespace PRN232.LMS.Services.Implementations
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Role, user.Role),
+                new Claim("role", user.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

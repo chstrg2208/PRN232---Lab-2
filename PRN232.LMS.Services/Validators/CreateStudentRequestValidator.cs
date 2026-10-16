@@ -15,13 +15,19 @@ namespace PRN232.LMS.Services.Validators
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("A valid email address is required.")
-                .Must(e => string.IsNullOrEmpty(e) || e.EndsWith("@fpt.edu.vn", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("Email must belong to FPT domain (@fpt.edu.vn).");
+                .MaximumLength(100).WithMessage("Email cannot exceed 100 characters.");
 
             RuleFor(x => x.DateOfBirth)
                 .NotEmpty().WithMessage("DateOfBirth is required.")
-                .LessThan(DateTime.Today.AddYears(-15))
-                .WithMessage("Student must be at least 15 years old.");
+                .LessThan(DateTime.Today.AddYears(-10))
+                .WithMessage("Student must be at least 10 years old.");
+
+            When(x => x.Credit.HasValue, () =>
+            {
+                RuleFor(x => x.Credit!.Value)
+                    .InclusiveBetween(0, 200)
+                    .WithMessage("Credit must be between 0 and 200.");
+            });
 
             When(x => !string.IsNullOrEmpty(x.RollNumber), () =>
             {

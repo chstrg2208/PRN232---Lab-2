@@ -75,6 +75,8 @@ namespace PRN232.LMS.Services.Models.Responses
         public string SemesterName { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<CourseSummaryResponse>? Courses { get; set; }
     }
 
@@ -97,7 +99,11 @@ namespace PRN232.LMS.Services.Models.Responses
         public int CourseId { get; set; }
         public string CourseName { get; set; } = string.Empty;
         public int SemesterId { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public SemesterSummaryResponse? Semester { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<EnrollmentSummaryResponse>? Enrollments { get; set; }
     }
 
@@ -113,8 +119,14 @@ namespace PRN232.LMS.Services.Models.Responses
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? RollNumber { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PhoneNumber { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<EnrollmentSummaryResponse>? Enrollments { get; set; }
     }
 
@@ -123,6 +135,8 @@ namespace PRN232.LMS.Services.Models.Responses
         public int StudentId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? RollNumber { get; set; }
     }
 
@@ -133,7 +147,11 @@ namespace PRN232.LMS.Services.Models.Responses
         public int CourseId { get; set; }
         public DateTime EnrollDate { get; set; }
         public string Status { get; set; } = string.Empty;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public StudentSummaryResponse? Student { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public CourseSummaryResponse? Course { get; set; }
     }
 
@@ -141,6 +159,8 @@ namespace PRN232.LMS.Services.Models.Responses
     {
         public int EnrollmentId { get; set; }
         public int CourseId { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? CourseName { get; set; }
         public DateTime EnrollDate { get; set; }
         public string Status { get; set; } = string.Empty;

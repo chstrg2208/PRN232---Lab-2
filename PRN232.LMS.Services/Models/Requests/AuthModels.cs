@@ -27,11 +27,11 @@ namespace PRN232.LMS.Services.Models.Requests
 
     public class RefreshTokenRequest
     {
-        [Required(ErrorMessage = "AccessToken is required")]
-        public string AccessToken { get; set; } = string.Empty;
+        public string? AccessToken { get; set; }
 
-        [Required(ErrorMessage = "RefreshToken is required")]
         public string RefreshToken { get; set; } = string.Empty;
+
+        public string? Token { get; set; }
     }
 
     public class AuthResponse

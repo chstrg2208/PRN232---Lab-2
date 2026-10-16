@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
@@ -22,15 +23,27 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetStudents(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
         {
+            if (!string.IsNullOrWhiteSpace(requestId))
+            {
+                Response.Headers["X-Request-Id"] = requestId;
+            }
+
             var result = await _studentService.GetStudentsAsync(queryParams);
+            if (string.IsNullOrWhiteSpace(queryParams.Fields))
+            {
+                var typedItems = result.Items.Cast<StudentResponse>().ToList();
+                return Ok(ApiResponse<List<StudentResponse>>.Ok(typedItems, "Students retrieved successfully", result.Pagination));
+            }
             return Ok(ApiResponse<IEnumerable<object>>.Ok(result.Items, "Students retrieved successfully", result.Pagination));
         }
 
         [HttpGet("{id:int}", Name = "GetStudentById")]
+        [Authorize]
         public async Task<IActionResult> GetStudentById(
             [FromRoute] int id,
             [FromQuery] string? fields,
@@ -40,6 +53,10 @@ namespace PRN232.LMS.API.Controllers
             if (result == null)
             {
                 return NotFound(ApiResponse<object>.Fail($"Student with ID {id} was not found"));
+            }
+            if (string.IsNullOrWhiteSpace(fields) && result is StudentResponse typedStudent)
+            {
+                return Ok(ApiResponse<StudentResponse>.Ok(typedStudent, "Student retrieved successfully"));
             }
             return Ok(ApiResponse<object>.Ok(result, "Student retrieved successfully"));
         }

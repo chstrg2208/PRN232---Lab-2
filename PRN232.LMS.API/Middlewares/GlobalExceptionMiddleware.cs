@@ -47,8 +47,7 @@ namespace PRN232.LMS.API.Middlewares
 
             var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
             await context.Response.WriteAsync(json);
