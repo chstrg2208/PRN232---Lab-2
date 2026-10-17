@@ -24,6 +24,7 @@ namespace PRN232.LMS.API.Controllers
 
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<List<StudentResponse>>), 200)]
         public async Task<IActionResult> GetStudents(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
