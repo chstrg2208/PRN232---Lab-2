@@ -23,7 +23,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetEnrollments(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
@@ -42,7 +42,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetEnrollmentById")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetEnrollmentById(
             [FromRoute] int id,
             [FromQuery] string? fields,

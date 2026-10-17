@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRN232.LMS.Services.Interfaces;
 using PRN232.LMS.Services.Models.Requests;
@@ -13,6 +14,7 @@ namespace PRN232.LMS.API.Controllers.v2
     [ApiController]
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/students")]
+    [Authorize]
     public class StudentsV2Controller : ControllerBase
     {
         private readonly IStudentService _studentService;

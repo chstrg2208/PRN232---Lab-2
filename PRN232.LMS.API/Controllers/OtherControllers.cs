@@ -23,7 +23,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetCourses(
             [FromQuery] QueryParameters queryParams,
             [FromHeader(Name = "X-Request-Id")] string? requestId = null)
@@ -42,7 +42,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetCourseById")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetCourseById(
             [FromRoute] int id,
             [FromQuery] string? fields,
@@ -62,7 +62,7 @@ namespace PRN232.LMS.API.Controllers
 
         // Nested resource: /api/v1/courses/{courseId}/students
         [HttpGet("{courseId:int}/students")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetStudentsByCourse([FromRoute] int courseId)
         {
             var students = await _courseService.GetStudentsByCourseIdAsync(courseId);
@@ -127,7 +127,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetSemesters([FromQuery] QueryParameters queryParams)
         {
             var result = await _semesterService.GetSemestersAsync(queryParams);
@@ -140,7 +140,7 @@ namespace PRN232.LMS.API.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetSemesterById")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetSemesterById(
             [FromRoute] int id,
             [FromQuery] string? fields,
